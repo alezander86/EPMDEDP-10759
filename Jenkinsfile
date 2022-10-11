@@ -9,7 +9,7 @@ pipeline {
                 dir('pet') {
                     //git branch: '${BRANCH_NAME}', url: 'git@git.epam.com:mykola_serdiuk/spring-petclinic.git', credentialsId: 'git_epam'
                     echo 'Checkout'
-                    ls -la
+                    sh 'ls -la'
                 }
             }
         }
