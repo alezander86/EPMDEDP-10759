@@ -1,0 +1,21 @@
+podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
+  containers: [
+    containerTemplate(name: 'docker', image: 'docker:dind', ttyEnabled: true, command: 'cat', privileged: true),
+  ],
+  volumes: [
+    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+  ]) {
+    node('demo-customer-pod') {
+        stage('Prepare') {
+            git branch: 'main', url: 'https://github.com/Rolika4/EPMDEDP-10759.git'
+        }
+        stage('Build Docker Image') {
+            container('docker') {
+                sh """
+                  docker version
+                  docker build -t test .
+                """
+            }
+        }
+    }
+}
