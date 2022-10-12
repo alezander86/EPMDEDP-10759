@@ -1,3 +1,7 @@
+properties([parameters([string(defaultValue: '1.0.0', name: 'image_version')])])
+
+DOCKER = credentials('docker_cred')
+
 podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
   containers: [
     containerTemplate(name: 'docker', image: 'docker:dind', ttyEnabled: true, command: 'cat', privileged: true),
@@ -6,16 +10,19 @@ podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'je
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
   ]) {
     node('demo-customer-pod') {
-        stage('Prepare') {
+        stage('Checkout') {
             git branch: 'main', url: 'https://github.com/Rolika4/EPMDEDP-10759.git'
         }
-        stage('Build Docker Image') {
+        stage('Docker build') {
             container('docker') {
-                sh """
-                  docker version
-                  docker build -t test .
-                """
+                dir('Dockerfile/build'){
+                    withDockerRegistry(credentialsId: 'docker_cred') {
+                        docker.build('rolliku/crud').push("${image_version}")
+
+                    }
+                }
             }
         }
+
     }
 }
