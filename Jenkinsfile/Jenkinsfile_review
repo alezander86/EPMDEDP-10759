@@ -1,0 +1,14 @@
+pipeline {
+    agent {
+        label 'hadolint'
+    }
+    stages {
+        stage('Dockerlint') {
+            steps {
+                echo '-----------------------------Hadolint------------------------------'
+                sh 'hadolint Dockerfile | tee -a hadolint_lint.txt'
+                
+            }
+        }
+    }
+}
