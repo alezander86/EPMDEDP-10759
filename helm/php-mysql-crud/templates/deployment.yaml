@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crud
+spec:
+  replicas: 1
+  strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 1
+    imeoutSeconds: 20
+  selector:
+    matchLabels:
+      app: crud
+  template: 
+    metadata:
+      labels:
+        app: crud
+    spec:
+      containers:
+      - name: crud
+        image: {{ .Values.image.repo}}/{{ .Values.image.name}}:{{ .Values.image.version}}
+        ports:
+          - name: http-port
+            containerPort: 80
