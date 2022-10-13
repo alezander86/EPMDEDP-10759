@@ -16,7 +16,7 @@ podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'je
         stage('Docker build') {
             container('docker') {
                 dir('Dockerfile/build'){
-                    withDockerRegistry(credentialsId: 'docker_cred') {
+                    withDockerRegistry(credentialsId: 'dockerhub') {
                         docker.build('rolliku/crud').push("${image_version}")
 
                     }
