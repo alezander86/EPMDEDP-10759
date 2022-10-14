@@ -5,11 +5,10 @@ metadata:
 spec:
   replicas: 1
   strategy:
-  type: RollingUpdate
-  rollingUpdate:
-    maxSurge: 1
-    maxUnavailable: 1
-    imeoutSeconds: 20
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: crud
@@ -20,7 +19,7 @@ spec:
     spec:
       containers:
       - name: crud
-        image: {{ .Values.image.repo}}/{{ .Values.image.name}}:{{ .Values.image.version}}
+        image: "{{ .Values.image.repo}}/{{ .Values.image.name}}:{{ .Chart.AppVersion }}"
         ports:
           - name: http-port
             containerPort: 80
