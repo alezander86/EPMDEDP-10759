@@ -1,10 +1,9 @@
 properties([parameters([string(defaultValue: '1.0.0', name: 'image_version')])])
 
-DOCKER = credentials('docker_cred')
-
 podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
   containers: [
     containerTemplate(name: 'docker', image: 'docker:dind', ttyEnabled: true, command: 'cat', privileged: true),
+    containerTemplate(name: 'helm', image: 'rolliku/inbound-agent:1.0.0', ttyEnabled: true, command: 'cat', privileged: true),
   ],
   volumes: [
     hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
@@ -18,11 +17,20 @@ podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'je
                 dir('Dockerfile/build'){
                     withDockerRegistry(credentialsId: 'dockerhub') {
                         docker.build('rolliku/crud').push("${image_version}")
-
                     }
                 }
             }
         }
-
+        stage('Helm package and push') {
+            container('helm') {
+                dir('helm'){
+                    sh '''
+                        helm repo add crud http://chartmuseum:8080/
+                        helm package php-mysql-crud
+                        curl --data-binary "@PhpMysqlCrud-1.0.0.tgz" http://chartmuseum:8080/api/charts
+                    '''
+                }
+            }
+        }
     }
 }
