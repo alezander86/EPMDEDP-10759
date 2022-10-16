@@ -1,5 +1,5 @@
     properties(
-        [parameters([string(defaultValue: '1.0.0', name: 'CHART_VERSION'),
+        [parameters([string(defaultValue: '1.0.0', name: 'HELM_VERSION'),
                     string(defaultValue: 'chartmuseum', name: 'CHARTMUSEUM_URL'),
                     string(defaultValue: 'crud', name: 'REPO_NAME'),
                     choice(choices: ['dev', 'prod'], name: 'STAGE_CHOICE')
@@ -8,9 +8,6 @@
     podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins-helm-sa',
     containers: [
         containerTemplate(name: 'helm', image: 'rolliku/inbound-agent:1.0.0', ttyEnabled: true, command: 'cat', privileged: true),
-    ],
-    volumes: [
-        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
     ]) {
         node('demo-customer-pod') {
             stage('Deploy app by helm') {
@@ -20,15 +17,13 @@
                             helm repo add ${REPO_NAME} http://${CHARTMUSEUM_URL}:8080/
                             helm repo update
                         '''
-                    script {
-                        if(params.STAGE_CHOICE == "dev"){
-                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${CHART_VERSION}'
-                        }else if (params.STAGE_CHOICE == "prod") {
-                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${CHART_VERSION}'
+                        script {
+                            if(params.STAGE_CHOICE == "dev"){
+                                sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${HELM_VERSION}'
+                            }else if (params.STAGE_CHOICE == "prod") {
+                                sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${HELM_VERSION}'
+                            }
                         }
-                    }
-                            
-                        
                     }
                 }
             }
