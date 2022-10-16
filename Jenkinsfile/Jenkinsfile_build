@@ -2,7 +2,7 @@
         [parameters([string(defaultValue: '1.0.0', name: 'IMAGE_VERSION'), 
                     string(defaultValue: '1.0.0', name: 'CHART_VERSION'),
                     string(defaultValue: 'chartmuseum', name: 'CHARTMUSEUM_URL'),
-                    string(defaultValue: 'chartmuseum', name: 'REPO_NAME')
+                    string(defaultValue: 'crud', name: 'REPO_NAME')
         ])])
 
     podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
