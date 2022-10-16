@@ -1,7 +1,8 @@
     properties(
-        [parameters([string(defaultValue: '1.0.0', name: 'image_version'), 
-                    string(defaultValue: '1.0.0', name: 'helm_version'),
-                    string(defaultValue: 'chartmuseum', name: 'Chartmuseum_name')
+        [parameters([string(defaultValue: '1.0.0', name: 'image version'), 
+                    string(defaultValue: '1.0.0', name: 'helm version'),
+                    string(defaultValue: 'chartmuseum', name: 'Chartmuseum url'),
+                    string(defaultValue: 'chartmuseum', name: 'Repo name')
         ])])
 
     podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
@@ -29,9 +30,9 @@
                 container('helm') {
                     dir('helm'){
                         sh '''
-                            helm repo add crud http://${Chartmuseum_name}:8080/
-                            helm package php-mysql-crud --app-version ${image_version} --version ${helm_version}
-                            curl --data-binary "@PhpMysqlCrud-${helm_version}.tgz" http://${Chartmuseum_name}:8080/api/charts
+                            helm repo add ${Repo name} http://${Chartmuseum url}:8080/
+                            helm package php-mysql-crud --app-version ${image version} --version ${helm version}
+                            curl --data-binary "@phpmysqlcrud-${helm_version}.tgz" http://${Chartmuseum url}:8080/api/charts
                         '''
                     }
                 }

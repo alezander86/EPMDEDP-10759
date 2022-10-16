@@ -1,5 +1,5 @@
 apiVersion: v2
-name       : PhpMysqlCrud
+name       : phpmysqlcrud
 description: Helm chart for php-mysql-crud app
 type       : application
 version    : 1.2.0

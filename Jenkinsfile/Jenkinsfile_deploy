@@ -1,4 +1,9 @@
-
+    properties(
+        [parameters([string(defaultValue: '1.0.0', name: 'HELM_VERSION'),
+                    string(defaultValue: 'chartmuseum', name: 'CHARTMUSEUM_URL'),
+                    string(defaultValue: 'crud', name: 'REPO_NAME'),
+                    choice(choices: ['dev', 'prod'], name: 'STAGE_CHOICE')
+        ])])
 
     podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins-helm-sa',
     containers: [
@@ -12,10 +17,18 @@
                 container('helm') {
                     dir('helm'){
                         sh '''
-                            helm repo add crud http://chartmuseum:8080/
+                            helm repo add ${REPO_NAME} http://${CHARTMUSEUM_URL}:8080/
                             helm repo update
-                            helm upgrade --install test crud/PhpMysqlCrud -n ms-onboarding-dev --version 1.0.1
                         '''
+                    script {
+                        if(params.STAGE_CHOICE == "dev"){
+                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${HELM_VERSION}'
+                        }else if (params.STAGE_CHOICE == "prod") {
+                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${HELM_VERSION}'
+                        }
+                    }
+                            
+                        
                     }
                 }
             }
