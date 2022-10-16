@@ -1,8 +1,8 @@
     properties(
-        [parameters([string(defaultValue: '1.0.0', name: 'image version'), 
-                    string(defaultValue: '1.0.0', name: 'helm version'),
-                    string(defaultValue: 'chartmuseum', name: 'Chartmuseum url'),
-                    string(defaultValue: 'chartmuseum', name: 'Repo name')
+        [parameters([string(defaultValue: '1.0.0', name: 'IMAGE_VERSION'), 
+                    string(defaultValue: '1.0.0', name: 'CHART_VERSION'),
+                    string(defaultValue: 'chartmuseum', name: 'CHARTMUSEUM_URL'),
+                    string(defaultValue: 'chartmuseum', name: 'REPO_NAME')
         ])])
 
     podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
@@ -21,7 +21,7 @@
                 container('docker') {
                     dir('Dockerfile/build'){
                         withDockerRegistry(credentialsId: 'dockerhub') {
-                            docker.build('rolliku/crud').push("${image_version}")
+                            docker.build('rolliku/crud').push("${IMAGE_VERSION}")
                         }
                     }
                 }
@@ -30,9 +30,9 @@
                 container('helm') {
                     dir('helm'){
                         sh '''
-                            helm repo add ${Repo name} http://${Chartmuseum url}:8080/
-                            helm package php-mysql-crud --app-version ${image version} --version ${helm version}
-                            curl --data-binary "@phpmysqlcrud-${helm_version}.tgz" http://${Chartmuseum url}:8080/api/charts
+                            helm repo add ${REPO_NAME} http://${CHARTMUSEUM_URL}:8080/
+                            helm package php-mysql-crud --app-version ${IMAGE_VERSION} --version ${CHART_VERSION}
+                            curl --data-binary "@phpmysqlcrud-${CHART_VERSION}.tgz" http://${CHARTMUSEUM_URL}:8080/api/charts
                         '''
                     }
                 }

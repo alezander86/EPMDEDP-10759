@@ -1,5 +1,5 @@
     properties(
-        [parameters([string(defaultValue: '1.0.0', name: 'HELM_VERSION'),
+        [parameters([string(defaultValue: '1.0.0', name: 'CHART_VERSION'),
                     string(defaultValue: 'chartmuseum', name: 'CHARTMUSEUM_URL'),
                     string(defaultValue: 'crud', name: 'REPO_NAME'),
                     choice(choices: ['dev', 'prod'], name: 'STAGE_CHOICE')
@@ -22,9 +22,9 @@
                         '''
                     script {
                         if(params.STAGE_CHOICE == "dev"){
-                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${HELM_VERSION}'
+                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${CHART_VERSION}'
                         }else if (params.STAGE_CHOICE == "prod") {
-                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${HELM_VERSION}'
+                            sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${CHART_VERSION}'
                         }
                     }
                             
