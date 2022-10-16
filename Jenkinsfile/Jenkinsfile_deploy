@@ -1,0 +1,23 @@
+
+
+    podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins-helm-sa',
+    containers: [
+        containerTemplate(name: 'helm', image: 'rolliku/inbound-agent:1.0.0', ttyEnabled: true, command: 'cat', privileged: true),
+    ],
+    volumes: [
+        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    ]) {
+        node('demo-customer-pod') {
+            stage('Deploy app by helm') {
+                container('helm') {
+                    dir('helm'){
+                        sh '''
+                            helm repo add crud http://chartmuseum:8080/
+                            helm repo update
+                            helm upgrade --install test crud/PhpMysqlCrud -n ms-onboarding-dev --version 1.0.1
+                        '''
+                    }
+                }
+            }
+        }
+    }
