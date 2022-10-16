@@ -1,40 +1,40 @@
-properties(
-    [parameters([string(defaultValue: '1.0.0', name: 'image_version'), 
-                 string(defaultValue: '1.0.0', name: 'helm_version'),
-                 string(defaultValue: 'chartmuseum', name: 'Chartmuseum_name')
-    ])])
+    properties(
+        [parameters([string(defaultValue: '1.0.0', name: 'image_version'), 
+                    string(defaultValue: '1.0.0', name: 'helm_version'),
+                    string(defaultValue: 'chartmuseum', name: 'Chartmuseum_name')
+        ])])
 
-podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
-  containers: [
-    containerTemplate(name: 'docker', image: 'docker:dind', ttyEnabled: true, command: 'cat', privileged: true),
-    containerTemplate(name: 'helm', image: 'rolliku/inbound-agent:1.0.0', ttyEnabled: true, command: 'cat', privileged: true),
-  ],
-  volumes: [
-    hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
-  ]) {
-    node('demo-customer-pod') {
-        stage('Checkout') {
-            git branch: 'main', url: 'https://github.com/Rolika4/EPMDEDP-10759.git'
-        }
-        stage('Docker build') {
-            container('docker') {
-                dir('Dockerfile/build'){
-                    withDockerRegistry(credentialsId: 'dockerhub') {
-                        docker.build('rolliku/crud').push("${image_version}")
+    podTemplate(label: 'demo-customer-pod', cloud: 'kubernetes', serviceAccount: 'jenkins',
+    containers: [
+        containerTemplate(name: 'docker', image: 'docker:dind', ttyEnabled: true, command: 'cat', privileged: true),
+        containerTemplate(name: 'helm', image: 'rolliku/inbound-agent:1.0.0', ttyEnabled: true, command: 'cat', privileged: true),
+    ],
+    volumes: [
+        hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')
+    ]) {
+        node('demo-customer-pod') {
+            stage('Checkout') {
+                git branch: 'main', url: 'https://github.com/Rolika4/EPMDEDP-10759.git'
+            }
+            stage('Docker build') {
+                container('docker') {
+                    dir('Dockerfile/build'){
+                        withDockerRegistry(credentialsId: 'dockerhub') {
+                            docker.build('rolliku/crud').push("${image_version}")
+                        }
+                    }
+                }
+            }
+            stage('Helm package and push') {
+                container('helm') {
+                    dir('helm'){
+                        sh '''
+                            helm repo add crud http://${Chartmuseum_name}:8080/
+                            helm package php-mysql-crud --app-version ${image_version} --version ${helm_version}
+                            curl --data-binary "@PhpMysqlCrud-${helm_version}.tgz" http://${Chartmuseum_name}:8080/api/charts
+                        '''
                     }
                 }
             }
         }
-        stage('Helm package and push') {
-            container('helm') {
-                dir('helm'){
-                    sh '''
-                        helm repo add crud http://${Chartmuseum_name}:8080/
-                        helm package php-mysql-crud --app-version ${image_version} --version ${helm_version}
-                        curl --data-binary "@PhpMysqlCrud-${helm_version}.tgz" http://${Chartmuseum_name}:8080/api/charts
-                    '''
-                }
-            }
-        }
     }
-}

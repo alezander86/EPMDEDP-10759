@@ -3,7 +3,9 @@ kind: Deployment
 metadata:
   name: crud
 spec:
-  replicas: 1
+  replicas: {{ if eq .Release.Namespace "ms-onboarding-dev" }} {{ .Values.replicas.dev }}
+       {{ else if eq .Release.Namespace "ms-onboarding-prod" }} {{ .Values.replicas.prod }}
+  {{ end }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
