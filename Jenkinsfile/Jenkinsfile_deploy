@@ -20,8 +20,11 @@
                         script {
                             if(params.STAGE_CHOICE == "dev"){
                                 sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-dev --version ${HELM_VERSION}'
-                            }else if (params.STAGE_CHOICE == "prod") {
+                                sh 'kubectl get secrets -n ms-onboarding-dev'
+                            }
+                            else if (params.STAGE_CHOICE == "prod") {
                                 sh 'helm upgrade --install test ${REPO_NAME}/phpmysqlcrud -n ms-onboarding-prod --version ${HELM_VERSION}'
+                                sh 'kubectl get secrets -n ms-onboarding-prod'
                             }
                         }
                     }
